@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bribe the Scale</title>
+    <link rel="stylesheet" href="/web/styles.css" />
+  </head>
+  <body>
+    <div id="game-root">
+      <div id="hud-left" class="panel">
+        <div id="timer-box">Time: <span id="timer-value">60</span></div>
+        <div id="score-box">Score: <span id="score-value">0</span></div>
+        <div id="lives-box">
+          <span>Lives:</span>
+          <div id="hearts-row"></div>
+        </div>
+      </div>
+
+      <div id="rules-panel" class="panel">
+        <div class="rules-heading">The item must:</div>
+        <ul id="rules-list"></ul>
+      </div>
+
+      <div id="center-stage">
+        <div id="prompt-box">
+          <div id="prompt-title">Name one object inside this active range</div>
+          <div id="range-band">
+            <div id="min-card" class="range-card">
+              <div class="range-label">MIN</div>
+              <div id="min-value" class="range-value">1 g</div>
+            </div>
+            <div class="range-separator">to</div>
+            <div id="max-card" class="range-card">
+              <div class="range-label">MAX</div>
+              <div id="max-value" class="range-value">10,000 kg</div>
+            </div>
+          </div>
+          <div id="boundary-hint">Submit one object name.</div>
+        </div>
+
+        <div id="scale-area">
+          <img id="scale-body" src="/assets/scale_body.png" alt="scale body" />
+          <img id="scale-plate" src="/assets/scale_plate.png" alt="scale plate" />
+          <img id="scale-needle" src="/assets/scale_lancetta.png" alt="scale needle" />
+          <div id="item-layer"></div>
+          <div id="scale-weight-display" class="idle">
+            <div class="weight-label">WEIGHT</div>
+            <div id="scale-weight-value">0 kg</div>
+          </div>
+          <div id="result-banner" class="hidden">CORRECT</div>
+        </div>
+
+        <div id="used-objects-area">
+          <div id="used-objects-title">Object used:</div>
+          <div id="used-objects-floor"></div>
+        </div>
+
+        <div id="input-row">
+          <input id="answer-input" type="text" autocomplete="off" placeholder="Type one item..." />
+          <button id="send-button">SEND</button>
+        </div>
+      </div>
+
+      <div id="right-panel">
+        <img id="mascot" src="/assets/mascotte.png" alt="mascot" />
+        <div id="speech-bubble">
+          <div id="speech-text">Press SEND to start.</div>
+        </div>
+      </div>
+
+      <div id="countdown-overlay" class="overlay hidden"></div>
+      <div id="pause-overlay" class="overlay hidden">
+        <div class="overlay-card">PAUSED<br />Press ESC to resume</div>
+      </div>
+      <div id="gameover-overlay" class="overlay hidden">
+        <div class="overlay-card">
+          <div id="gameover-title">GAME OVER</div>
+          <div id="gameover-score">Score: 0</div>
+          <button id="restart-button">RESTART</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="/web/app.js" defer></script>
+  </body>
+</html>

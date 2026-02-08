@@ -32,3 +32,8 @@ sysinfo.txt
 
 # --- JetBrains Rider plugin (optional) ---
 Assets/Plugins/Editor/JetBrains*
+
+
+*.env
+*.jsonl
+*.log

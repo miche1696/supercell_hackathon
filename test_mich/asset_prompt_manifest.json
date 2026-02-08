@@ -1,0 +1,692 @@
+{
+  "meta": {
+    "project": "Bribe the Scale",
+    "version": "1.0",
+    "target_scene_resolution": {
+      "width": 1600,
+      "height": 900
+    },
+    "pixel_policy": {
+      "base_pixel_scale": 4,
+      "notes": "Design assets to snap cleanly to integer scaling; avoid subpixel details."
+    },
+    "naming_convention": "snake_case.png",
+    "priority_levels": [
+      "P0",
+      "P1",
+      "P2"
+    ]
+  },
+  "prompt_system": {
+    "combine_rule": "full_prompt = style_prompt + '\nSUBJECT: ' + subject_prompt",
+    "style_blocks": [
+      {
+        "id": "style_cute_arcade_pixel_v1",
+        "prompt": "Cute retro arcade pixel art, cohesive limited palette, high readability, clean silhouettes, soft rim light, top-left key light, slight dithering, crisp edges, no blur, no photorealism, playful mood, camera side view, game-ready sprite art"
+      },
+      {
+        "id": "style_cute_arcade_pixel_v1_flat",
+        "prompt": "Cute retro arcade pixel art, flat-shaded variant, reduced texture, strong outlines, consistent palette and lighting with previous assets, high contrast UI readability, no blur, no photorealism"
+      }
+    ],
+    "global_negative_prompt": "photorealistic, 3d render, anti-aliased edges, soft blurry edges, low contrast, noisy background clutter, text artifacts, watermark, logo",
+    "api_hints": {
+      "transparent_assets": "Request transparent background (RGBA).",
+      "opaque_assets": "Request fully opaque image, no alpha holes.",
+      "consistency_hint": "Reuse same seed or reference style image for all assets in one batch."
+    }
+  },
+  "assets": [
+    {
+      "id": "bg_main_arcade_room",
+      "priority": "P0",
+      "category": "background",
+      "content": "Main gameplay background",
+      "output": {
+        "width": 1600,
+        "height": 900,
+        "background": "opaque"
+      },
+      "animation_strategy": {
+        "mode": "static"
+      },
+      "prompt_parts": {
+        "style_id": "style_cute_arcade_pixel_v1",
+        "subject_prompt": "Retro arcade room interior, center stage platform for weighing scale, left side clear for rules panel, right side clear area for mascot, subtle depth layers, soft spotlight centered, clean and uncluttered midground"
+      }
+    },
+    {
+      "id": "bg_overlay_parallax_shapes",
+      "priority": "P1",
+      "category": "background",
+      "content": "Optional animated foreground particles/shapes",
+      "output": {
+        "width": 1600,
+        "height": 900,
+        "background": "transparent"
+      },
+      "animation_strategy": {
+        "mode": "looped_translation",
+        "notes": "Move slowly to fake depth."
+      },
+      "prompt_parts": {
+        "style_id": "style_cute_arcade_pixel_v1_flat",
+        "subject_prompt": "Sparse retro geometric shapes and dust motes overlay, subtle decorative layer only, does not obstruct central gameplay area"
+      }
+    },
+    {
+      "id": "scale_body",
+      "priority": "P0",
+      "category": "scale",
+      "content": "Main weighing scale base",
+      "output": {
+        "width": 700,
+        "height": 380,
+        "background": "transparent"
+      },
+      "animation_strategy": {
+        "mode": "static"
+      },
+      "anchor_hint": "bottom_center",
+      "prompt_parts": {
+        "style_id": "style_cute_arcade_pixel_v1",
+        "subject_prompt": "Arcade-style mechanical weighing scale body, chunky and cute, front-facing with slight perspective, readable dial housing area, metallic but stylized"
+      }
+    },
+    {
+      "id": "scale_plate",
+      "priority": "P0",
+      "category": "scale",
+      "content": "Item landing plate",
+      "output": {
+        "width": 420,
+        "height": 120,
+        "background": "transparent"
+      },
+      "animation_strategy": {
+        "mode": "static"
+      },
+      "anchor_hint": "bottom_center",
+      "prompt_parts": {
+        "style_id": "style_cute_arcade_pixel_v1",
+        "subject_prompt": "Top weighing plate for scale, flat sturdy platform, centered, clean silhouette, supports overlaying any item sprite"
+      }
+    },
+    {
+      "id": "dial_face",
+      "priority": "P0",
+      "category": "scale",
+      "content": "Dial background with colored zones",
+      "output": {
+        "width": 300,
+        "height": 300,
+        "background": "transparent"
+      },
+      "animation_strategy": {
+        "mode": "static"
+      },
+      "anchor_hint": "center",
+      "prompt_parts": {
+        "style_id": "style_cute_arcade_pixel_v1_flat",
+        "subject_prompt": "Round weighing dial face, clear tick marks, green pass zone and red fail zone, high readability at small size, no numbers required"
+      }
+    },
+    {
+      "id": "dial_needle",
+      "priority": "P0",
+      "category": "scale",
+      "content": "Rotating dial needle",
+      "output": {
+        "width": 300,
+        "height": 300,
+        "background": "transparent"
+      },
+      "animation_strategy": {
+        "mode": "transform_rotate",
+        "pivot": "center"
+      },
+      "anchor_hint": "center",
+      "prompt_parts": {
+        "style_id": "style_cute_arcade_pixel_v1_flat",
+        "subject_prompt": "Single bold needle for dial, strong contrast color, center hub included, designed to rotate cleanly around exact center"
+      }
+    },
+    {
+      "id": "mascot_core",
+      "priority": "P0",
+      "category": "mascot",
+      "content": "Main mascot expression set",
+      "output": {
+        "width": 420,
+        "height": 640,
+        "background": "transparent"
+      },
+      "animation_strategy": {
+        "mode": "state_swap",
+        "states": [
+          "idle",
+          "talk_open",
+          "talk_closed",
+          "success",
+          "roast"
+        ]
+      },
+      "anchor_hint": "bottom_center",
+      "prompt_parts_series": [
+        {
+          "state": "idle",
+          "style_id": "style_cute_arcade_pixel_v1",
+          "subject_prompt": "Friendly arcade game host mascot, full body standing pose, confident and playful neutral expression, facing slightly toward center of screen"
+        },
+        {
+          "state": "talk_open",
+          "style_id": "style_cute_arcade_pixel_v1",
+          "subject_prompt": "Same mascot, same pose and camera, mouth open talking expression, preserve identical body proportions and placement"
+        },
+        {
+          "state": "talk_closed",
+          "style_id": "style_cute_arcade_pixel_v1",
+          "subject_prompt": "Same mascot, same pose and camera, mouth closed talking transition expression, preserve exact silhouette alignment"
+        },
+        {
+          "state": "success",
+          "style_id": "style_cute_arcade_pixel_v1",
+          "subject_prompt": "Same mascot, same pose and camera, happy success expression, bright eyes, subtle celebratory gesture"
+        },
+        {
+          "state": "roast",
+          "style_id": "style_cute_arcade_pixel_v1",
+          "subject_prompt": "Same mascot, same pose and camera, teasing roast expression, playful smug look, still friendly"
+        }
+      ]
+    },
+    {
+      "id": "speech_bubble_frame",
+      "priority": "P0",
+      "category": "ui",
+      "content": "Mascot dialogue bubble",
+      "output": {
+        "width": 560,
+        "height": 240,
+        "background": "transparent"
+      },
+      "animation_strategy": {
+        "mode": "static"
+      },
+      "prompt_parts": {
+        "style_id": "style_cute_arcade_pixel_v1_flat",
+        "subject_prompt": "Pixel-art speech bubble UI frame with pointer tail, rounded rectangle, high readability interior area for two lines of text"
+      }
+    },
+    {
+      "id": "hearts_ui_set",
+      "priority": "P0",
+      "category": "ui",
+      "content": "Lives icons and pop animation",
+      "output": {
+        "width": 64,
+        "height": 64,
+        "background": "transparent"
+      },
+      "animation_strategy": {
+        "mode": "state_swap_and_sheet",
+        "states": [
+          "heart_full",
+          "heart_empty"
+        ],
+        "extra_sheet": {
+          "id": "heart_pop_sheet",
+          "frame_width": 64,
+          "frame_height": 64,
+          "frames": 6,
+          "sheet_width": 384,
+          "sheet_height": 64
+        }
+      },
+      "prompt_parts_series": [
+        {
+          "state": "heart_full",
+          "style_id": "style_cute_arcade_pixel_v1_flat",
+          "subject_prompt": "Retro pixel heart life icon, full and bright, clean silhouette"
+        },
+        {
+          "state": "heart_empty",
+          "style_id": "style_cute_arcade_pixel_v1_flat",
+          "subject_prompt": "Retro pixel heart life icon, empty or cracked outline version, same size and silhouette"
+        },
+        {
+          "state": "heart_pop_sheet",
+          "style_id": "style_cute_arcade_pixel_v1_flat",
+          "subject_prompt": "6-frame horizontal sprite sheet of heart popping burst, starts full heart and ends in tiny fragments, transparent background"
+        }
+      ]
+    },
+    {
+      "id": "rules_panel_bg",
+      "priority": "P0",
+      "category": "ui",
+      "content": "Left side rules panel",
+      "output": {
+        "width": 360,
+        "height": 720,
+        "background": "transparent"
+      },
+      "animation_strategy": {
+        "mode": "static"
+      },
+      "prompt_parts": {
+        "style_id": "style_cute_arcade_pixel_v1_flat",
+        "subject_prompt": "Retro arcade panel frame for rules list, subtle metallic border, dark readable interior, no embedded text"
+      }
+    },
+    {
+      "id": "input_bar_bg",
+      "priority": "P0",
+      "category": "ui",
+      "content": "Input container",
+      "output": {
+        "width": 860,
+        "height": 120,
+        "background": "transparent"
+      },
+      "animation_strategy": {
+        "mode": "static"
+      },
+      "prompt_parts": {
+        "style_id": "style_cute_arcade_pixel_v1_flat",
+        "subject_prompt": "Retro pixel text input bar frame, large readable center field, subtle glow accents"
+      }
+    },
+    {
+      "id": "submit_button_set",
+      "priority": "P0",
+      "category": "ui",
+      "content": "Submit button states",
+      "output": {
+        "width": 260,
+        "height": 96,
+        "background": "transparent"
+      },
+      "animation_strategy": {
+        "mode": "state_swap",
+        "states": [
+          "idle",
+          "hover",
+          "pressed",
+          "disabled"
+        ]
+      },
+      "prompt_parts_series": [
+        {
+          "state": "idle",
+          "style_id": "style_cute_arcade_pixel_v1_flat",
+          "subject_prompt": "Retro arcade button frame, idle state, no text baked in"
+        },
+        {
+          "state": "hover",
+          "style_id": "style_cute_arcade_pixel_v1_flat",
+          "subject_prompt": "Same button frame, hover state, slightly brighter edge highlights"
+        },
+        {
+          "state": "pressed",
+          "style_id": "style_cute_arcade_pixel_v1_flat",
+          "subject_prompt": "Same button frame, pressed state, slightly darker and vertically compressed feel"
+        },
+        {
+          "state": "disabled",
+          "style_id": "style_cute_arcade_pixel_v1_flat",
+          "subject_prompt": "Same button frame, disabled state, desaturated low emphasis"
+        }
+      ]
+    },
+    {
+      "id": "banner_correct",
+      "priority": "P0",
+      "category": "ui",
+      "content": "Center verdict banner for pass",
+      "output": {
+        "width": 760,
+        "height": 220,
+        "background": "transparent"
+      },
+      "animation_strategy": {
+        "mode": "spawn_scale_fade"
+      },
+      "prompt_parts": {
+        "style_id": "style_cute_arcade_pixel_v1",
+        "subject_prompt": "Retro arcade victory banner with integrated word CORRECT in pixel lettering, green dominant palette, celebratory but clean"
+      }
+    },
+    {
+      "id": "banner_wrong",
+      "priority": "P0",
+      "category": "ui",
+      "content": "Center verdict banner for fail",
+      "output": {
+        "width": 760,
+        "height": 220,
+        "background": "transparent"
+      },
+      "animation_strategy": {
+        "mode": "spawn_scale_fade"
+      },
+      "prompt_parts": {
+        "style_id": "style_cute_arcade_pixel_v1",
+        "subject_prompt": "Retro arcade fail banner with integrated word WRONG in pixel lettering, red dominant palette, punchy and readable"
+      }
+    },
+    {
+      "id": "countdown_numbers_set",
+      "priority": "P0",
+      "category": "ui",
+      "content": "Large 3 2 1 countdown numbers",
+      "output": {
+        "width": 300,
+        "height": 360,
+        "background": "transparent"
+      },
+      "animation_strategy": {
+        "mode": "state_swap",
+        "states": [
+          "3",
+          "2",
+          "1"
+        ]
+      },
+      "prompt_parts_series": [
+        {
+          "state": "3",
+          "style_id": "style_cute_arcade_pixel_v1",
+          "subject_prompt": "Large single pixel number 3, arcade style, center aligned"
+        },
+        {
+          "state": "2",
+          "style_id": "style_cute_arcade_pixel_v1",
+          "subject_prompt": "Large single pixel number 2, arcade style, center aligned"
+        },
+        {
+          "state": "1",
+          "style_id": "style_cute_arcade_pixel_v1",
+          "subject_prompt": "Large single pixel number 1, arcade style, center aligned"
+        }
+      ]
+    },
+    {
+      "id": "pause_modal_frame",
+      "priority": "P0",
+      "category": "ui",
+      "content": "Pause overlay frame",
+      "output": {
+        "width": 760,
+        "height": 440,
+        "background": "transparent"
+      },
+      "animation_strategy": {
+        "mode": "static"
+      },
+      "prompt_parts": {
+        "style_id": "style_cute_arcade_pixel_v1_flat",
+        "subject_prompt": "Retro arcade modal panel frame for pause menu, no baked text"
+      }
+    },
+    {
+      "id": "gameover_modal_frame",
+      "priority": "P0",
+      "category": "ui",
+      "content": "Game over overlay frame",
+      "output": {
+        "width": 860,
+        "height": 520,
+        "background": "transparent"
+      },
+      "animation_strategy": {
+        "mode": "static"
+      },
+      "prompt_parts": {
+        "style_id": "style_cute_arcade_pixel_v1_flat",
+        "subject_prompt": "Retro arcade modal panel frame for game over score screen, no baked text"
+      }
+    },
+    {
+      "id": "timer_warning_overlay",
+      "priority": "P1",
+      "category": "fx",
+      "content": "Screen edge warning overlay",
+      "output": {
+        "width": 1600,
+        "height": 900,
+        "background": "transparent"
+      },
+      "animation_strategy": {
+        "mode": "alpha_pulse"
+      },
+      "prompt_parts": {
+        "style_id": "style_cute_arcade_pixel_v1_flat",
+        "subject_prompt": "Subtle red-orange vignette border overlay for urgency, center clear, no text"
+      }
+    },
+    {
+      "id": "fail_flash_overlay",
+      "priority": "P1",
+      "category": "fx",
+      "content": "Quick fail flash",
+      "output": {
+        "width": 1600,
+        "height": 900,
+        "background": "transparent"
+      },
+      "animation_strategy": {
+        "mode": "single_frame_flash"
+      },
+      "prompt_parts": {
+        "style_id": "style_cute_arcade_pixel_v1_flat",
+        "subject_prompt": "Very light red full-screen wash overlay, intended for 100-150ms fail flash"
+      }
+    },
+    {
+      "id": "impact_dust_sheet",
+      "priority": "P0",
+      "category": "fx",
+      "content": "Landing dust effect",
+      "output": {
+        "width": 768,
+        "height": 128,
+        "background": "transparent"
+      },
+      "animation_strategy": {
+        "mode": "spritesheet",
+        "frame_width": 96,
+        "frame_height": 128,
+        "frames": 8
+      },
+      "prompt_parts": {
+        "style_id": "style_cute_arcade_pixel_v1_flat",
+        "subject_prompt": "8-frame horizontal sprite sheet of small dust puff impact effect for object landing on platform"
+      }
+    },
+    {
+      "id": "spark_sheet",
+      "priority": "P1",
+      "category": "fx",
+      "content": "Small celebratory spark particles",
+      "output": {
+        "width": 512,
+        "height": 64,
+        "background": "transparent"
+      },
+      "animation_strategy": {
+        "mode": "spritesheet",
+        "frame_width": 64,
+        "frame_height": 64,
+        "frames": 8
+      },
+      "prompt_parts": {
+        "style_id": "style_cute_arcade_pixel_v1_flat",
+        "subject_prompt": "8-frame horizontal sprite sheet of tiny retro sparkles for success accents"
+      }
+    },
+    {
+      "id": "item_fallback_generic",
+      "priority": "P0",
+      "category": "items",
+      "content": "Fallback item when no specific sprite exists",
+      "output": {
+        "width": 256,
+        "height": 256,
+        "background": "transparent"
+      },
+      "animation_strategy": {
+        "mode": "static"
+      },
+      "anchor_hint": "bottom_center",
+      "prompt_parts": {
+        "style_id": "style_cute_arcade_pixel_v1",
+        "subject_prompt": "Generic neutral object crate/icon for unknown item fallback, simple cute shape, readable silhouette"
+      }
+    },
+    {
+      "id": "item_shadow_blob",
+      "priority": "P0",
+      "category": "items",
+      "content": "Shadow under dropped item",
+      "output": {
+        "width": 240,
+        "height": 80,
+        "background": "transparent"
+      },
+      "animation_strategy": {
+        "mode": "scale_alpha_tween"
+      },
+      "anchor_hint": "center",
+      "prompt_parts": {
+        "style_id": "style_cute_arcade_pixel_v1_flat",
+        "subject_prompt": "Soft oval pixel-art shadow blob, dark semi-transparent gradient style, no hard edges"
+      }
+    },
+    {
+      "id": "mute_icon_set",
+      "priority": "P0",
+      "category": "ui",
+      "content": "Audio toggle icons",
+      "output": {
+        "width": 48,
+        "height": 48,
+        "background": "transparent"
+      },
+      "animation_strategy": {
+        "mode": "state_swap",
+        "states": [
+          "mute_off",
+          "mute_on"
+        ]
+      },
+      "prompt_parts_series": [
+        {
+          "state": "mute_off",
+          "style_id": "style_cute_arcade_pixel_v1_flat",
+          "subject_prompt": "Pixel icon speaker with sound waves, clean silhouette"
+        },
+        {
+          "state": "mute_on",
+          "style_id": "style_cute_arcade_pixel_v1_flat",
+          "subject_prompt": "Pixel icon speaker crossed out, clean silhouette"
+        }
+      ]
+    },
+    {
+      "id": "logo_title",
+      "priority": "P1",
+      "category": "ui",
+      "content": "Game title logo for start screen",
+      "output": {
+        "width": 900,
+        "height": 260,
+        "background": "transparent"
+      },
+      "animation_strategy": {
+        "mode": "static"
+      },
+      "prompt_parts": {
+        "style_id": "style_cute_arcade_pixel_v1",
+        "subject_prompt": "Game title logo reading BRIBE THE SCALE, retro arcade pixel lettering, playful and bold"
+      }
+    },
+    {
+      "id": "button_secondary_set",
+      "priority": "P1",
+      "category": "ui",
+      "content": "Start, how-to-play, retry generic button states",
+      "output": {
+        "width": 300,
+        "height": 96,
+        "background": "transparent"
+      },
+      "animation_strategy": {
+        "mode": "state_swap",
+        "states": [
+          "idle",
+          "hover",
+          "pressed"
+        ]
+      },
+      "prompt_parts_series": [
+        {
+          "state": "idle",
+          "style_id": "style_cute_arcade_pixel_v1_flat",
+          "subject_prompt": "Retro secondary UI button frame, no text baked in"
+        },
+        {
+          "state": "hover",
+          "style_id": "style_cute_arcade_pixel_v1_flat",
+          "subject_prompt": "Same secondary button frame, hover brighter"
+        },
+        {
+          "state": "pressed",
+          "style_id": "style_cute_arcade_pixel_v1_flat",
+          "subject_prompt": "Same secondary button frame, pressed darker"
+        }
+      ]
+    },
+    {
+      "id": "item_dynamic_template",
+      "priority": "P2",
+      "category": "items",
+      "content": "Template for on-demand specific item sprite generation",
+      "output": {
+        "width": 256,
+        "height": 256,
+        "background": "transparent"
+      },
+      "animation_strategy": {
+        "mode": "static"
+      },
+      "anchor_hint": "bottom_center",
+      "prompt_parts": {
+        "style_id": "style_cute_arcade_pixel_v1",
+        "subject_prompt_template": "Single object sprite of {{canonical_name}}, isolated, full object visible, side view, centered, no text, transparent background"
+      }
+    }
+  ],
+  "dynamic_item_generation": {
+    "slug_rule": "lowercase, spaces_to_underscore, alnum_only",
+    "filename_template": "item_{{slug}}.png",
+    "fallback_logic": "if missing sprite then use item_fallback_generic + draw label text from canonical_name",
+    "cache_policy": "save generated dynamic item sprite to assets/items/ for reuse"
+  },
+  "folders": [
+    "assets/background",
+    "assets/scale",
+    "assets/mascot",
+    "assets/ui",
+    "assets/items",
+    "assets/fx",
+    "assets/audio"
+  ],
+  "you_might_be_forgetting": [
+    "Bitmap font files or a licensed pixel font for consistent text rendering",
+    "Safe text boxes where runtime text length can vary (rules, mascot lines, reason)",
+    "A tiny style reference board image to keep AI generations consistent across sessions",
+    "Export settings checklist (exact resolution, transparent PNG, no color profile surprises)",
+    "Audio assets list and loudness normalization so SFX do not clip in the demo"
+  ]
+}

@@ -1,0 +1,348 @@
+### Prompt 1
+asset_id: bg_main_arcade_room
+prompt:
+Cute retro arcade pixel art, cohesive limited palette, high readability, clean silhouettes, soft rim light, top-left key light, slight dithering, crisp edges, no blur, no photorealism, playful mood, camera side view, game-ready sprite art
+SUBJECT: Retro arcade room interior, center stage platform for weighing scale, left side clear for rules panel, right side clear area for mascot, subtle depth layers, soft spotlight centered, clean and uncluttered midground
+negative_prompt:
+photorealistic, 3d render, anti-aliased edges, soft blurry edges, low contrast, noisy background clutter, text artifacts, watermark, logo
+
+### Prompt 2
+asset_id: bg_overlay_parallax_shapes
+prompt:
+Cute retro arcade pixel art, flat-shaded variant, reduced texture, strong outlines, consistent palette and lighting with previous assets, high contrast UI readability, no blur, no photorealism
+SUBJECT: Sparse retro geometric shapes and dust motes overlay, subtle decorative layer only, does not obstruct central gameplay area
+negative_prompt:
+photorealistic, 3d render, anti-aliased edges, soft blurry edges, low contrast, noisy background clutter, text artifacts, watermark, logo
+
+### Prompt 3
+asset_id: scale_body
+prompt:
+Cute retro arcade pixel art, cohesive limited palette, high readability, clean silhouettes, soft rim light, top-left key light, slight dithering, crisp edges, no blur, no photorealism, playful mood, camera side view, game-ready sprite art
+SUBJECT: Arcade-style mechanical weighing scale body, chunky and cute, front-facing with slight perspective, readable dial housing area, metallic but stylized
+negative_prompt:
+photorealistic, 3d render, anti-aliased edges, soft blurry edges, low contrast, noisy background clutter, text artifacts, watermark, logo
+
+### Prompt 4
+asset_id: scale_plate
+prompt:
+Cute retro arcade pixel art, cohesive limited palette, high readability, clean silhouettes, soft rim light, top-left key light, slight dithering, crisp edges, no blur, no photorealism, playful mood, camera side view, game-ready sprite art
+SUBJECT: Top weighing plate for scale, flat sturdy platform, centered, clean silhouette, supports overlaying any item sprite
+negative_prompt:
+photorealistic, 3d render, anti-aliased edges, soft blurry edges, low contrast, noisy background clutter, text artifacts, watermark, logo
+
+### Prompt 5
+asset_id: dial_face
+prompt:
+Cute retro arcade pixel art, flat-shaded variant, reduced texture, strong outlines, consistent palette and lighting with previous assets, high contrast UI readability, no blur, no photorealism
+SUBJECT: Round weighing dial face, clear tick marks, green pass zone and red fail zone, high readability at small size, no numbers required
+negative_prompt:
+photorealistic, 3d render, anti-aliased edges, soft blurry edges, low contrast, noisy background clutter, text artifacts, watermark, logo
+
+### Prompt 6
+asset_id: dial_needle
+prompt:
+Cute retro arcade pixel art, flat-shaded variant, reduced texture, strong outlines, consistent palette and lighting with previous assets, high contrast UI readability, no blur, no photorealism
+SUBJECT: Single bold needle for dial, strong contrast color, center hub included, designed to rotate cleanly around exact center
+negative_prompt:
+photorealistic, 3d render, anti-aliased edges, soft blurry edges, low contrast, noisy background clutter, text artifacts, watermark, logo
+
+### Prompt 7
+asset_id: mascot_core
+variant: idle
+prompt:
+Cute retro arcade pixel art, cohesive limited palette, high readability, clean silhouettes, soft rim light, top-left key light, slight dithering, crisp edges, no blur, no photorealism, playful mood, camera side view, game-ready sprite art
+SUBJECT: Friendly arcade game host mascot, full body standing pose, confident and playful neutral expression, facing slightly toward center of screen
+negative_prompt:
+photorealistic, 3d render, anti-aliased edges, soft blurry edges, low contrast, noisy background clutter, text artifacts, watermark, logo
+
+### Prompt 8
+asset_id: mascot_core
+variant: talk_open
+prompt:
+Cute retro arcade pixel art, cohesive limited palette, high readability, clean silhouettes, soft rim light, top-left key light, slight dithering, crisp edges, no blur, no photorealism, playful mood, camera side view, game-ready sprite art
+SUBJECT: Same mascot, same pose and camera, mouth open talking expression, preserve identical body proportions and placement
+negative_prompt:
+photorealistic, 3d render, anti-aliased edges, soft blurry edges, low contrast, noisy background clutter, text artifacts, watermark, logo
+
+### Prompt 9
+asset_id: mascot_core
+variant: talk_closed
+prompt:
+Cute retro arcade pixel art, cohesive limited palette, high readability, clean silhouettes, soft rim light, top-left key light, slight dithering, crisp edges, no blur, no photorealism, playful mood, camera side view, game-ready sprite art
+SUBJECT: Same mascot, same pose and camera, mouth closed talking transition expression, preserve exact silhouette alignment
+negative_prompt:
+photorealistic, 3d render, anti-aliased edges, soft blurry edges, low contrast, noisy background clutter, text artifacts, watermark, logo
+
+### Prompt 10
+asset_id: mascot_core
+variant: success
+prompt:
+Cute retro arcade pixel art, cohesive limited palette, high readability, clean silhouettes, soft rim light, top-left key light, slight dithering, crisp edges, no blur, no photorealism, playful mood, camera side view, game-ready sprite art
+SUBJECT: Same mascot, same pose and camera, happy success expression, bright eyes, subtle celebratory gesture
+negative_prompt:
+photorealistic, 3d render, anti-aliased edges, soft blurry edges, low contrast, noisy background clutter, text artifacts, watermark, logo
+
+### Prompt 11
+asset_id: mascot_core
+variant: roast
+prompt:
+Cute retro arcade pixel art, cohesive limited palette, high readability, clean silhouettes, soft rim light, top-left key light, slight dithering, crisp edges, no blur, no photorealism, playful mood, camera side view, game-ready sprite art
+SUBJECT: Same mascot, same pose and camera, teasing roast expression, playful smug look, still friendly
+negative_prompt:
+photorealistic, 3d render, anti-aliased edges, soft blurry edges, low contrast, noisy background clutter, text artifacts, watermark, logo
+
+### Prompt 12
+asset_id: speech_bubble_frame
+prompt:
+Cute retro arcade pixel art, flat-shaded variant, reduced texture, strong outlines, consistent palette and lighting with previous assets, high contrast UI readability, no blur, no photorealism
+SUBJECT: Pixel-art speech bubble UI frame with pointer tail, rounded rectangle, high readability interior area for two lines of text
+negative_prompt:
+photorealistic, 3d render, anti-aliased edges, soft blurry edges, low contrast, noisy background clutter, text artifacts, watermark, logo
+
+### Prompt 13
+asset_id: hearts_ui_set
+variant: heart_full
+prompt:
+Cute retro arcade pixel art, flat-shaded variant, reduced texture, strong outlines, consistent palette and lighting with previous assets, high contrast UI readability, no blur, no photorealism
+SUBJECT: Retro pixel heart life icon, full and bright, clean silhouette
+negative_prompt:
+photorealistic, 3d render, anti-aliased edges, soft blurry edges, low contrast, noisy background clutter, text artifacts, watermark, logo
+
+### Prompt 14
+asset_id: hearts_ui_set
+variant: heart_empty
+prompt:
+Cute retro arcade pixel art, flat-shaded variant, reduced texture, strong outlines, consistent palette and lighting with previous assets, high contrast UI readability, no blur, no photorealism
+SUBJECT: Retro pixel heart life icon, empty or cracked outline version, same size and silhouette
+negative_prompt:
+photorealistic, 3d render, anti-aliased edges, soft blurry edges, low contrast, noisy background clutter, text artifacts, watermark, logo
+
+### Prompt 15
+asset_id: hearts_ui_set
+variant: heart_pop_sheet
+prompt:
+Cute retro arcade pixel art, flat-shaded variant, reduced texture, strong outlines, consistent palette and lighting with previous assets, high contrast UI readability, no blur, no photorealism
+SUBJECT: 6-frame horizontal sprite sheet of heart popping burst, starts full heart and ends in tiny fragments, transparent background
+negative_prompt:
+photorealistic, 3d render, anti-aliased edges, soft blurry edges, low contrast, noisy background clutter, text artifacts, watermark, logo
+
+### Prompt 16
+asset_id: rules_panel_bg
+prompt:
+Cute retro arcade pixel art, flat-shaded variant, reduced texture, strong outlines, consistent palette and lighting with previous assets, high contrast UI readability, no blur, no photorealism
+SUBJECT: Retro arcade panel frame for rules list, subtle metallic border, dark readable interior, no embedded text
+negative_prompt:
+photorealistic, 3d render, anti-aliased edges, soft blurry edges, low contrast, noisy background clutter, text artifacts, watermark, logo
+
+### Prompt 17
+asset_id: input_bar_bg
+prompt:
+Cute retro arcade pixel art, flat-shaded variant, reduced texture, strong outlines, consistent palette and lighting with previous assets, high contrast UI readability, no blur, no photorealism
+SUBJECT: Retro pixel text input bar frame, large readable center field, subtle glow accents
+negative_prompt:
+photorealistic, 3d render, anti-aliased edges, soft blurry edges, low contrast, noisy background clutter, text artifacts, watermark, logo
+
+### Prompt 18
+asset_id: submit_button_set
+variant: idle
+prompt:
+Cute retro arcade pixel art, flat-shaded variant, reduced texture, strong outlines, consistent palette and lighting with previous assets, high contrast UI readability, no blur, no photorealism
+SUBJECT: Retro arcade button frame, idle state, no text baked in
+negative_prompt:
+photorealistic, 3d render, anti-aliased edges, soft blurry edges, low contrast, noisy background clutter, text artifacts, watermark, logo
+
+### Prompt 19
+asset_id: submit_button_set
+variant: hover
+prompt:
+Cute retro arcade pixel art, flat-shaded variant, reduced texture, strong outlines, consistent palette and lighting with previous assets, high contrast UI readability, no blur, no photorealism
+SUBJECT: Same button frame, hover state, slightly brighter edge highlights
+negative_prompt:
+photorealistic, 3d render, anti-aliased edges, soft blurry edges, low contrast, noisy background clutter, text artifacts, watermark, logo
+
+### Prompt 20
+asset_id: submit_button_set
+variant: pressed
+prompt:
+Cute retro arcade pixel art, flat-shaded variant, reduced texture, strong outlines, consistent palette and lighting with previous assets, high contrast UI readability, no blur, no photorealism
+SUBJECT: Same button frame, pressed state, slightly darker and vertically compressed feel
+negative_prompt:
+photorealistic, 3d render, anti-aliased edges, soft blurry edges, low contrast, noisy background clutter, text artifacts, watermark, logo
+
+### Prompt 21
+asset_id: submit_button_set
+variant: disabled
+prompt:
+Cute retro arcade pixel art, flat-shaded variant, reduced texture, strong outlines, consistent palette and lighting with previous assets, high contrast UI readability, no blur, no photorealism
+SUBJECT: Same button frame, disabled state, desaturated low emphasis
+negative_prompt:
+photorealistic, 3d render, anti-aliased edges, soft blurry edges, low contrast, noisy background clutter, text artifacts, watermark, logo
+
+### Prompt 22
+asset_id: banner_correct
+prompt:
+Cute retro arcade pixel art, cohesive limited palette, high readability, clean silhouettes, soft rim light, top-left key light, slight dithering, crisp edges, no blur, no photorealism, playful mood, camera side view, game-ready sprite art
+SUBJECT: Retro arcade victory banner with integrated word CORRECT in pixel lettering, green dominant palette, celebratory but clean
+negative_prompt:
+photorealistic, 3d render, anti-aliased edges, soft blurry edges, low contrast, noisy background clutter, text artifacts, watermark, logo
+
+### Prompt 23
+asset_id: banner_wrong
+prompt:
+Cute retro arcade pixel art, cohesive limited palette, high readability, clean silhouettes, soft rim light, top-left key light, slight dithering, crisp edges, no blur, no photorealism, playful mood, camera side view, game-ready sprite art
+SUBJECT: Retro arcade fail banner with integrated word WRONG in pixel lettering, red dominant palette, punchy and readable
+negative_prompt:
+photorealistic, 3d render, anti-aliased edges, soft blurry edges, low contrast, noisy background clutter, text artifacts, watermark, logo
+
+### Prompt 24
+asset_id: countdown_numbers_set
+variant: 3
+prompt:
+Cute retro arcade pixel art, cohesive limited palette, high readability, clean silhouettes, soft rim light, top-left key light, slight dithering, crisp edges, no blur, no photorealism, playful mood, camera side view, game-ready sprite art
+SUBJECT: Large single pixel number 3, arcade style, center aligned
+negative_prompt:
+photorealistic, 3d render, anti-aliased edges, soft blurry edges, low contrast, noisy background clutter, text artifacts, watermark, logo
+
+### Prompt 25
+asset_id: countdown_numbers_set
+variant: 2
+prompt:
+Cute retro arcade pixel art, cohesive limited palette, high readability, clean silhouettes, soft rim light, top-left key light, slight dithering, crisp edges, no blur, no photorealism, playful mood, camera side view, game-ready sprite art
+SUBJECT: Large single pixel number 2, arcade style, center aligned
+negative_prompt:
+photorealistic, 3d render, anti-aliased edges, soft blurry edges, low contrast, noisy background clutter, text artifacts, watermark, logo
+
+### Prompt 26
+asset_id: countdown_numbers_set
+variant: 1
+prompt:
+Cute retro arcade pixel art, cohesive limited palette, high readability, clean silhouettes, soft rim light, top-left key light, slight dithering, crisp edges, no blur, no photorealism, playful mood, camera side view, game-ready sprite art
+SUBJECT: Large single pixel number 1, arcade style, center aligned
+negative_prompt:
+photorealistic, 3d render, anti-aliased edges, soft blurry edges, low contrast, noisy background clutter, text artifacts, watermark, logo
+
+### Prompt 27
+asset_id: pause_modal_frame
+prompt:
+Cute retro arcade pixel art, flat-shaded variant, reduced texture, strong outlines, consistent palette and lighting with previous assets, high contrast UI readability, no blur, no photorealism
+SUBJECT: Retro arcade modal panel frame for pause menu, no baked text
+negative_prompt:
+photorealistic, 3d render, anti-aliased edges, soft blurry edges, low contrast, noisy background clutter, text artifacts, watermark, logo
+
+### Prompt 28
+asset_id: gameover_modal_frame
+prompt:
+Cute retro arcade pixel art, flat-shaded variant, reduced texture, strong outlines, consistent palette and lighting with previous assets, high contrast UI readability, no blur, no photorealism
+SUBJECT: Retro arcade modal panel frame for game over score screen, no baked text
+negative_prompt:
+photorealistic, 3d render, anti-aliased edges, soft blurry edges, low contrast, noisy background clutter, text artifacts, watermark, logo
+
+### Prompt 29
+asset_id: timer_warning_overlay
+prompt:
+Cute retro arcade pixel art, flat-shaded variant, reduced texture, strong outlines, consistent palette and lighting with previous assets, high contrast UI readability, no blur, no photorealism
+SUBJECT: Subtle red-orange vignette border overlay for urgency, center clear, no text
+negative_prompt:
+photorealistic, 3d render, anti-aliased edges, soft blurry edges, low contrast, noisy background clutter, text artifacts, watermark, logo
+
+### Prompt 30
+asset_id: fail_flash_overlay
+prompt:
+Cute retro arcade pixel art, flat-shaded variant, reduced texture, strong outlines, consistent palette and lighting with previous assets, high contrast UI readability, no blur, no photorealism
+SUBJECT: Very light red full-screen wash overlay, intended for 100-150ms fail flash
+negative_prompt:
+photorealistic, 3d render, anti-aliased edges, soft blurry edges, low contrast, noisy background clutter, text artifacts, watermark, logo
+
+### Prompt 31
+asset_id: impact_dust_sheet
+prompt:
+Cute retro arcade pixel art, flat-shaded variant, reduced texture, strong outlines, consistent palette and lighting with previous assets, high contrast UI readability, no blur, no photorealism
+SUBJECT: 8-frame horizontal sprite sheet of small dust puff impact effect for object landing on platform
+negative_prompt:
+photorealistic, 3d render, anti-aliased edges, soft blurry edges, low contrast, noisy background clutter, text artifacts, watermark, logo
+
+### Prompt 32
+asset_id: spark_sheet
+prompt:
+Cute retro arcade pixel art, flat-shaded variant, reduced texture, strong outlines, consistent palette and lighting with previous assets, high contrast UI readability, no blur, no photorealism
+SUBJECT: 8-frame horizontal sprite sheet of tiny retro sparkles for success accents
+negative_prompt:
+photorealistic, 3d render, anti-aliased edges, soft blurry edges, low contrast, noisy background clutter, text artifacts, watermark, logo
+
+### Prompt 33
+asset_id: item_fallback_generic
+prompt:
+Cute retro arcade pixel art, cohesive limited palette, high readability, clean silhouettes, soft rim light, top-left key light, slight dithering, crisp edges, no blur, no photorealism, playful mood, camera side view, game-ready sprite art
+SUBJECT: Generic neutral object crate/icon for unknown item fallback, simple cute shape, readable silhouette
+negative_prompt:
+photorealistic, 3d render, anti-aliased edges, soft blurry edges, low contrast, noisy background clutter, text artifacts, watermark, logo
+
+### Prompt 34
+asset_id: item_shadow_blob
+prompt:
+Cute retro arcade pixel art, flat-shaded variant, reduced texture, strong outlines, consistent palette and lighting with previous assets, high contrast UI readability, no blur, no photorealism
+SUBJECT: Soft oval pixel-art shadow blob, dark semi-transparent gradient style, no hard edges
+negative_prompt:
+photorealistic, 3d render, anti-aliased edges, soft blurry edges, low contrast, noisy background clutter, text artifacts, watermark, logo
+
+### Prompt 35
+asset_id: mute_icon_set
+variant: mute_off
+prompt:
+Cute retro arcade pixel art, flat-shaded variant, reduced texture, strong outlines, consistent palette and lighting with previous assets, high contrast UI readability, no blur, no photorealism
+SUBJECT: Pixel icon speaker with sound waves, clean silhouette
+negative_prompt:
+photorealistic, 3d render, anti-aliased edges, soft blurry edges, low contrast, noisy background clutter, text artifacts, watermark, logo
+
+### Prompt 36
+asset_id: mute_icon_set
+variant: mute_on
+prompt:
+Cute retro arcade pixel art, flat-shaded variant, reduced texture, strong outlines, consistent palette and lighting with previous assets, high contrast UI readability, no blur, no photorealism
+SUBJECT: Pixel icon speaker crossed out, clean silhouette
+negative_prompt:
+photorealistic, 3d render, anti-aliased edges, soft blurry edges, low contrast, noisy background clutter, text artifacts, watermark, logo
+
+### Prompt 37
+asset_id: logo_title
+prompt:
+Cute retro arcade pixel art, cohesive limited palette, high readability, clean silhouettes, soft rim light, top-left key light, slight dithering, crisp edges, no blur, no photorealism, playful mood, camera side view, game-ready sprite art
+SUBJECT: Game title logo reading BRIBE THE SCALE, retro arcade pixel lettering, playful and bold
+negative_prompt:
+photorealistic, 3d render, anti-aliased edges, soft blurry edges, low contrast, noisy background clutter, text artifacts, watermark, logo
+
+### Prompt 38
+asset_id: button_secondary_set
+variant: idle
+prompt:
+Cute retro arcade pixel art, flat-shaded variant, reduced texture, strong outlines, consistent palette and lighting with previous assets, high contrast UI readability, no blur, no photorealism
+SUBJECT: Retro secondary UI button frame, no text baked in
+negative_prompt:
+photorealistic, 3d render, anti-aliased edges, soft blurry edges, low contrast, noisy background clutter, text artifacts, watermark, logo
+
+### Prompt 39
+asset_id: button_secondary_set
+variant: hover
+prompt:
+Cute retro arcade pixel art, flat-shaded variant, reduced texture, strong outlines, consistent palette and lighting with previous assets, high contrast UI readability, no blur, no photorealism
+SUBJECT: Same secondary button frame, hover brighter
+negative_prompt:
+photorealistic, 3d render, anti-aliased edges, soft blurry edges, low contrast, noisy background clutter, text artifacts, watermark, logo
+
+### Prompt 40
+asset_id: button_secondary_set
+variant: pressed
+prompt:
+Cute retro arcade pixel art, flat-shaded variant, reduced texture, strong outlines, consistent palette and lighting with previous assets, high contrast UI readability, no blur, no photorealism
+SUBJECT: Same secondary button frame, pressed darker
+negative_prompt:
+photorealistic, 3d render, anti-aliased edges, soft blurry edges, low contrast, noisy background clutter, text artifacts, watermark, logo
+
+### Prompt 41
+asset_id: item_dynamic_template
+variant: template
+prompt:
+Cute retro arcade pixel art, cohesive limited palette, high readability, clean silhouettes, soft rim light, top-left key light, slight dithering, crisp edges, no blur, no photorealism, playful mood, camera side view, game-ready sprite art
+SUBJECT: Single object sprite of {{canonical_name}}, isolated, full object visible, side view, centered, no text, transparent background
+negative_prompt:
+photorealistic, 3d render, anti-aliased edges, soft blurry edges, low contrast, noisy background clutter, text artifacts, watermark, logo
