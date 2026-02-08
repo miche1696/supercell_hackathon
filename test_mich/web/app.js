@@ -26,6 +26,7 @@ const dom = {
   usedObjectsFloor: document.getElementById("used-objects-floor"),
   countdownOverlay: document.getElementById("countdown-overlay"),
   pauseOverlay: document.getElementById("pause-overlay"),
+  winOverlay: document.getElementById("win-overlay"),
   gameoverOverlay: document.getElementById("gameover-overlay"),
   gameoverScore: document.getElementById("gameover-score"),
 };
@@ -49,6 +50,8 @@ const state = {
   ambientUnlockArmed: false,
   ambientVolume: 1,
   ambientMuted: false,
+  speechTypingTimer: null,
+  speechTypingToken: 0,
 };
 
 const HEART_FULL = "/assets/full_heart.png";
@@ -59,10 +62,14 @@ const USED_ITEM_TILE_SIZE_PX = 120;
 const USED_ITEM_TILE_SCALE = 0.82;
 const USED_ITEM_FRAME_SIZE_PX = Math.round(USED_ITEM_TILE_SIZE_PX * USED_ITEM_TILE_SCALE);
 // Crop a little from each frame edge (5% per side = 10% total) to hide seam artifacts.
-const FALL_ITEM_EDGE_TRIM_RATIO = 0.05;
+const FALL_ITEM_EDGE_TRIM_RATIO = 0.18;
 const USED_ITEM_EDGE_TRIM_RATIO = 0.05;
 const SPRITE_FRAME_EDGE_TRIM_RATIO = FALL_ITEM_EDGE_TRIM_RATIO;
 const VERDICT_NEEDLE_ANGLE_DEG = 30;
+const SPEECH_TYPEWRITER_START_DELAY_MS = 90;
+const SPEECH_TYPEWRITER_CHAR_DELAY_MS = 42;
+const SPEECH_TYPEWRITER_LINE_BREAK_DELAY_MS = 190;
+const SPEECH_TYPEWRITER_PUNCT_DELAY_MS = 140;
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -208,15 +215,26 @@ function playAmbientLoopFromStart() {
   }
 }
 
-function formatRange(g) {
-  if (g >= 1000) {
-    const kg = g / 1000;
-    if (Number.isInteger(kg)) {
-      return `${kg} kg`;
-    }
-    return `${kg.toFixed(1)} kg`;
+function formatClosestWeightFromG(weightG) {
+  const safeG = Math.max(0, Math.round(Number(weightG) || 0));
+  if (safeG < 1000) {
+    return `${safeG.toLocaleString()}g`;
   }
-  return `${g} g`;
+
+  const kg = safeG / 1000;
+  if (kg < 1000) {
+    const kgText = kg.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 3 });
+    return `${kgText}kg`;
+  }
+
+  const tons = safeG / 1000000;
+  const tonsText = tons.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 3 });
+  const tonUnit = tons === 1 ? "ton" : "tons";
+  return `${tonsText}${tonUnit}`;
+}
+
+function formatRange(g) {
+  return formatClosestWeightFromG(g);
 }
 
 function flashClass(el, className, durationMs = 900) {
@@ -254,13 +272,51 @@ function diffRules(previousRules, nextRules) {
 }
 
 function setSpeech(text) {
+  if (state.speechTypingTimer !== null) {
+    clearTimeout(state.speechTypingTimer);
+    state.speechTypingTimer = null;
+  }
+
+  state.speechTypingToken += 1;
+  const typingToken = state.speechTypingToken;
   const normalized = (text || "").trim();
   if (!normalized) {
     dom.speechText.textContent = "...";
+    dom.speechText.classList.remove("is-typing");
     return;
   }
-  const chunks = normalized.split(/\n+/).slice(0, 2);
-  dom.speechText.textContent = chunks.join("\n");
+
+  const message = normalized.split(/\n+/).slice(0, 2).join("\n");
+  dom.speechText.textContent = "";
+  dom.speechText.classList.add("is-typing");
+
+  let cursor = 0;
+  const renderNextChar = () => {
+    if (typingToken !== state.speechTypingToken) {
+      return;
+    }
+
+    if (cursor >= message.length) {
+      dom.speechText.classList.remove("is-typing");
+      state.speechTypingTimer = null;
+      return;
+    }
+
+    cursor += 1;
+    dom.speechText.textContent = message.slice(0, cursor);
+
+    const currentChar = message[cursor - 1];
+    let delay = SPEECH_TYPEWRITER_CHAR_DELAY_MS;
+    if (currentChar === "\n") {
+      delay = SPEECH_TYPEWRITER_LINE_BREAK_DELAY_MS;
+    } else if (/[.,!?]/.test(currentChar)) {
+      delay = SPEECH_TYPEWRITER_PUNCT_DELAY_MS;
+    }
+
+    state.speechTypingTimer = setTimeout(renderNextChar, delay);
+  };
+
+  state.speechTypingTimer = setTimeout(renderNextChar, SPEECH_TYPEWRITER_START_DELAY_MS);
 }
 
 function setResultBanner(label, isPass) {
@@ -331,15 +387,10 @@ function setWeightDisplayState(mode) {
   dom.scaleWeightDisplay.classList.add("idle");
 }
 
-function formatWeightKgFromG(weightG) {
-  const kg = Math.max(0, Number(weightG) || 0) / 1000;
-  return `${kg.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 3 })} kg`;
-}
-
 function setWeightDisplayValue(weightG) {
   const safe = Math.max(0, Math.round(Number(weightG) || 0));
   state.displayedWeightG = safe;
-  dom.scaleWeightValue.textContent = formatWeightKgFromG(safe);
+  dom.scaleWeightValue.textContent = formatClosestWeightFromG(safe);
 }
 
 function stopWeightAnimation() {
@@ -540,7 +591,7 @@ function renderRules(rules, previousRules = null) {
 
 function updatePrompt(previousState = null, ruleDelta = { added: [], removed: [] }) {
   const minG = state.backend?.min_g ?? 1;
-  const maxG = state.backend?.max_g ?? 10000000;
+  const maxG = state.backend?.max_g ?? 1000000000;
   dom.minValue.textContent = formatRange(minG);
   dom.maxValue.textContent = formatRange(maxG);
 
@@ -637,8 +688,16 @@ function showGameOver(reason) {
   setWeightDisplayState("idle");
   clearActiveItem();
   hideResultBanner();
+  dom.winOverlay.classList.add("hidden");
+  dom.gameoverOverlay.classList.add("hidden");
 
   const score = state.backend?.score ?? 0;
+  if (reason === "demo_win") {
+    dom.winOverlay.classList.remove("hidden");
+    setSpeech("You won the demo.");
+    return;
+  }
+
   dom.gameoverScore.textContent = `Score: ${score}`;
   dom.gameoverOverlay.classList.remove("hidden");
 
@@ -848,6 +907,7 @@ function togglePause() {
 }
 
 async function restartGame() {
+  dom.winOverlay.classList.add("hidden");
   dom.gameoverOverlay.classList.add("hidden");
   state.timerWarningShown.clear();
   state.countdownSecondsShown.clear();

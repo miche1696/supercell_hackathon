@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Bribe the Scale</title>
-    <link rel="stylesheet" href="/web/styles.css?v=20260208c" />
+    <link rel="stylesheet" href="/web/styles.css?v=20260208e" />
   </head>
   <body>
     <div id="game-root">
@@ -36,12 +36,12 @@
           <div id="range-band">
             <div id="min-card" class="range-card">
               <div class="range-label">MIN</div>
-              <div id="min-value" class="range-value">1 g</div>
+              <div id="min-value" class="range-value">1g</div>
             </div>
             <div class="range-separator">to</div>
             <div id="max-card" class="range-card">
               <div class="range-label">MAX</div>
-              <div id="max-value" class="range-value">10,000 kg</div>
+              <div id="max-value" class="range-value">10tons</div>
             </div>
           </div>
           <div id="boundary-hint">Submit one object name.</div>
@@ -54,7 +54,7 @@
           <div id="item-layer"></div>
           <div id="scale-weight-display" class="idle">
             <div class="weight-label">WEIGHT</div>
-            <div id="scale-weight-value">0 kg</div>
+            <div id="scale-weight-value">0g</div>
           </div>
           <div id="result-banner" class="hidden">CORRECT</div>
         </div>
@@ -82,6 +82,9 @@
       <div id="pause-overlay" class="overlay hidden">
         <div class="overlay-card">PAUSED<br />Press ESC to resume</div>
       </div>
+      <div id="win-overlay" class="overlay hidden">
+        <div id="win-title">YOU WON</div>
+      </div>
       <div id="gameover-overlay" class="overlay hidden">
         <div class="overlay-card">
           <div id="gameover-title">GAME OVER</div>
@@ -91,6 +94,6 @@
       </div>
     </div>
 
-    <script src="/web/app.js?v=20260208c" defer></script>
+    <script src="/web/app.js?v=20260208e" defer></script>
   </body>
 </html>

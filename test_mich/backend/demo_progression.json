@@ -1,0 +1,78 @@
+{
+  "default_actions": [
+    {
+      "type": "hold"
+    }
+  ],
+  "turns": {
+    "1": [
+      {
+        "type": "set_range",
+        "min_g": 10000000000,
+        "max_g": 10000000000000000000
+      },
+      {
+        "type": "set_rules",
+        "rules": [
+          "be in SF"
+        ]
+      }
+    ],
+    "2": [
+      {
+        "type": "set_range",
+        "min_g": 70000,
+        "max_g": 100000
+      },
+      {
+        "type": "set_rules",
+        "rules": [
+          "be italian",
+          "be able to do a pizza"
+        ]
+      }
+    ],
+    "3": [
+      {
+        "type": "set_range",
+        "min_g": 100000000,
+        "max_g": 10000000000000000000
+      },
+      {
+        "type": "set_rules",
+        "rules": [
+          "be in tokyo",
+          "be an object",
+          "fly"
+        ]
+      }
+    ],
+    "4": [
+      {
+        "type": "set_range",
+        "min_g": 10,
+        "max_g": 1000
+      },
+      {
+        "type": "set_rules",
+        "rules": [
+          "be a character of a Supercell Game"
+        ]
+      }
+    ],
+    "5": [
+      {
+        "type": "set_range",
+        "min_g": 4000,
+        "max_g": 8000
+      },
+      {
+        "type": "set_rules",
+        "rules": [
+          "be magic",
+          "be annoying"
+        ]
+      }
+    ]
+  }
+}

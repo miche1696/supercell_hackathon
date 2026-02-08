@@ -8,12 +8,12 @@ from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import urlparse
 
-from backend.game_engine import GameEngine
+from backend.game_engine import GameConfig, GameEngine
 from backend.tracing import new_trace_id, trace_event, trace_span
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent
-ENGINE = GameEngine(project_root=PROJECT_ROOT)
+ENGINE = GameEngine(project_root=PROJECT_ROOT, config=GameConfig.from_env(PROJECT_ROOT))
 ENGINE_LOCK = threading.Lock()
 
 

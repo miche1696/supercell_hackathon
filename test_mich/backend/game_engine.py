@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import json
 import math
+import os
 import random
 import re
 import shutil
@@ -14,6 +16,51 @@ from backend.tracing import trace_event, trace_span
 
 
 IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".webp"}
+_DOTENV_LINE_PATTERN = re.compile(r"^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)\s*$")
+
+
+def _read_dotenv_value(project_root: Path, key: str) -> Optional[str]:
+    dotenv_path = project_root / ".env"
+    if not dotenv_path.exists():
+        return None
+
+    for line in dotenv_path.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
+        match = _DOTENV_LINE_PATTERN.match(line)
+        if not match:
+            continue
+        line_key, raw_value = match.group(1), match.group(2).strip()
+        if line_key != key:
+            continue
+        if raw_value and raw_value[0] in {"'", '"'} and raw_value[-1] == raw_value[0]:
+            raw_value = raw_value[1:-1]
+        value = raw_value.strip()
+        return value or None
+
+    return None
+
+
+def _read_config_value(project_root: Path, key: str, default: Optional[str] = None) -> Optional[str]:
+    env_value = os.getenv(key)
+    if env_value is not None and str(env_value).strip() != "":
+        return str(env_value).strip()
+    dotenv_value = _read_dotenv_value(project_root, key)
+    if dotenv_value is not None:
+        return dotenv_value
+    return default
+
+
+def _parse_bool(value: Optional[str], default: bool = False) -> bool:
+    if value is None:
+        return default
+    normalized = value.strip().lower()
+    if normalized in {"1", "true", "yes", "on"}:
+        return True
+    if normalized in {"0", "false", "no", "off"}:
+        return False
+    return default
 
 
 def slugify(value: str) -> str:
@@ -187,6 +234,21 @@ class GameConfig:
     hold_allowed_after_turn: int = 5
     hold_thin_boundary_span_g: int = 20_000
     min_max_lock_ratio: float = 100.0
+    demo_mode: bool = False
+    demo_progression_path: str = "backend/demo_progression.json"
+
+    @classmethod
+    def from_env(cls, project_root: Path) -> "GameConfig":
+        demo_mode = _parse_bool(_read_config_value(project_root, "DEMO", default="0"), default=False)
+        demo_progression_path = _read_config_value(
+            project_root,
+            "DEMO_PROGRESS_PATH",
+            default="backend/demo_progression.json",
+        )
+        return cls(
+            demo_mode=demo_mode,
+            demo_progression_path=demo_progression_path or "backend/demo_progression.json",
+        )
 
 
 @dataclass
@@ -199,6 +261,8 @@ class GameState:
     active_rules: List[str] = field(default_factory=list)
     used_input_keys: Set[str] = field(default_factory=set)
     used_canonical: Set[str] = field(default_factory=set)
+    # Demo progression should advance only when a demo-config step is applied.
+    demo_progression_turn: int = 1
     range_locked: bool = False
     game_over: bool = False
     game_over_reason: Optional[str] = None
@@ -301,6 +365,11 @@ class GameEngine:
             self.config = config or GameConfig()
             self.rng = random.Random(42)
             self.asset_pipeline = AssetPipeline(project_root)
+            self.demo_progression_turns: Dict[int, List[Any]] = {}
+            self.demo_progression_default_actions: List[Any] = [{"type": "shrink_max"}]
+
+            if self.config.demo_mode:
+                self._load_demo_progression_plan()
 
             self.openai_judge = OpenAIJudge.from_env(project_root=project_root, model=self.config.judge_model)
             if self.openai_judge is None:
@@ -320,6 +389,8 @@ class GameEngine:
                 start_min_g=self.config.start_min_weight_g,
                 start_max_g=self.config.start_max_weight_g,
                 min_max_lock_ratio=self.config.min_max_lock_ratio,
+                demo_mode=self.config.demo_mode,
+                demo_progression_path=(self.config.demo_progression_path if self.config.demo_mode else None),
             )
 
     def reset(self) -> Dict:
@@ -336,6 +407,7 @@ class GameEngine:
                 lives=self.state.lives,
                 min_g=self.state.min_g,
                 max_g=self.state.max_g,
+                demo_progression_turn=(self.state.demo_progression_turn if self.config.demo_mode else None),
             )
             return self.public_state()
 
@@ -350,6 +422,7 @@ class GameEngine:
             "range_locked": self.state.range_locked,
             "game_over": self.state.game_over,
             "game_over_reason": self.state.game_over_reason,
+            "demo_progression_turn": (self.state.demo_progression_turn if self.config.demo_mode else None),
             "config": {
                 "timer_seconds": self.config.timer_seconds,
                 "start_lives": self.config.start_lives,
@@ -359,6 +432,8 @@ class GameEngine:
                 "hold_allowed_after_turn": self.config.hold_allowed_after_turn,
                 "hold_thin_boundary_span_g": self.config.hold_thin_boundary_span_g,
                 "min_max_lock_ratio": self.config.min_max_lock_ratio,
+                "demo_mode": self.config.demo_mode,
+                "demo_progression_path": (self.config.demo_progression_path if self.config.demo_mode else None),
             },
         }
 
@@ -505,7 +580,45 @@ class GameEngine:
             if passed:
                 points = self._points_for_pass()
                 self.state.score += points
-                progression_actions = self._apply_progression(judge.get("progression_actions", []), trace_id=trace_id)
+                if self._demo_win_reached():
+                    self.state.game_over = True
+                    self.state.game_over_reason = "demo_win"
+                    trace_event(
+                        "engine",
+                        "demo.win",
+                        trace_id=trace_id,
+                        turn=self.state.turn,
+                        demo_progression_turn=self.state.demo_progression_turn,
+                        final_demo_turn=self._demo_final_turn(),
+                    )
+                else:
+                    llm_proposed_actions = judge.get("progression_actions", [])
+                    proposed_actions = llm_proposed_actions
+                    progression_source = "llm"
+                    progression_turn = self.state.turn
+                    if self.config.demo_mode:
+                        progression_turn = self.state.demo_progression_turn
+                        proposed_actions = self._demo_actions_for_turn(progression_turn)
+                        progression_source = "demo_config"
+
+                    trace_event(
+                        "engine",
+                        "progression.plan_selected",
+                        trace_id=trace_id,
+                        source=progression_source,
+                        turn=self.state.turn,
+                        progression_turn=progression_turn,
+                        llm_proposed_actions=llm_proposed_actions,
+                        selected_actions=proposed_actions,
+                    )
+                    progression_actions = self._apply_progression(
+                        proposed_actions,
+                        trace_id=trace_id,
+                        allow_set_range=(progression_source == "demo_config"),
+                        allow_set_rules=(progression_source == "demo_config"),
+                    )
+                    if progression_source == "demo_config":
+                        self.state.demo_progression_turn += 1
                 ruling = "Correct"
                 ui_answer = self._limit_two_lines(judge.get("ui_answer") or self._pick_success_line())
             else:
@@ -813,8 +926,93 @@ class GameEngine:
 
         return normalized
 
-    def _normalize_progression_actions(self, actions: List[Any]) -> List[Dict[str, str]]:
-        normalized: List[Dict[str, str]] = []
+    def _load_demo_progression_plan(self) -> None:
+        config_path = Path(self.config.demo_progression_path)
+        if not config_path.is_absolute():
+            config_path = self.project_root / config_path
+
+        if not config_path.exists():
+            trace_event(
+                "engine",
+                "demo_progression.missing_file",
+                level="WARNING",
+                config_path=str(config_path),
+                fallback_actions=self.demo_progression_default_actions,
+            )
+            return
+
+        try:
+            parsed = json.loads(config_path.read_text(encoding="utf-8"))
+        except Exception as exc:
+            trace_event(
+                "engine",
+                "demo_progression.invalid_json",
+                level="WARNING",
+                config_path=str(config_path),
+                error_type=type(exc).__name__,
+                error=str(exc),
+                fallback_actions=self.demo_progression_default_actions,
+            )
+            return
+
+        if not isinstance(parsed, dict):
+            trace_event(
+                "engine",
+                "demo_progression.invalid_shape",
+                level="WARNING",
+                config_path=str(config_path),
+                detail="Top-level JSON must be an object.",
+                fallback_actions=self.demo_progression_default_actions,
+            )
+            return
+
+        loaded_turns: Dict[int, List[Any]] = {}
+        turns_raw = parsed.get("turns")
+        if isinstance(turns_raw, dict):
+            for turn_key, actions in turns_raw.items():
+                try:
+                    turn = int(str(turn_key).strip())
+                except ValueError:
+                    continue
+                if turn < 1 or not isinstance(actions, list):
+                    continue
+                loaded_turns[turn] = actions
+
+        default_actions_raw = parsed.get("default_actions")
+        if isinstance(default_actions_raw, list) and default_actions_raw:
+            self.demo_progression_default_actions = default_actions_raw
+
+        if loaded_turns:
+            self.demo_progression_turns = loaded_turns
+
+        trace_event(
+            "engine",
+            "demo_progression.loaded",
+            config_path=str(config_path),
+            turns_loaded=sorted(self.demo_progression_turns.keys()),
+            default_actions=self.demo_progression_default_actions,
+        )
+
+    def _demo_actions_for_turn(self, turn: int) -> List[Any]:
+        actions = self.demo_progression_turns.get(turn, self.demo_progression_default_actions)
+        return list(actions) if isinstance(actions, list) else [{"type": "shrink_max"}]
+
+    def _demo_final_turn(self) -> Optional[int]:
+        if not self.demo_progression_turns:
+            return None
+        return max(self.demo_progression_turns.keys())
+
+    def _demo_win_reached(self) -> bool:
+        if not self.config.demo_mode:
+            return False
+        final_turn = self._demo_final_turn()
+        if final_turn is None:
+            return False
+        # Win after solving the boundary generated by the final configured demo step.
+        return self.state.demo_progression_turn > final_turn
+
+    def _normalize_progression_actions(self, actions: List[Any]) -> List[Dict[str, Any]]:
+        normalized: List[Dict[str, Any]] = []
         for entry in actions[: self.config.max_progression_actions_per_turn]:
             if isinstance(entry, str):
                 normalized.append({"type": entry.strip().lower()})
@@ -824,9 +1022,15 @@ class GameEngine:
                 action_type = str(entry.get("type", "")).strip().lower()
                 if not action_type:
                     continue
-                item: Dict[str, str] = {"type": action_type}
+                item: Dict[str, Any] = {"type": action_type}
                 if "rule" in entry and isinstance(entry.get("rule"), str):
                     item["rule"] = entry["rule"]
+                if "rules" in entry and isinstance(entry.get("rules"), list):
+                    item["rules"] = entry.get("rules")
+                if "min_g" in entry:
+                    item["min_g"] = entry.get("min_g")
+                if "max_g" in entry:
+                    item["max_g"] = entry.get("max_g")
                 normalized.append(item)
 
         if not normalized:
@@ -869,15 +1073,23 @@ class GameEngine:
             and self._range_span_g() <= self.config.hold_thin_boundary_span_g
         )
 
-    def _apply_progression(self, proposed_actions: List[Any], trace_id: Optional[str] = None) -> List[str]:
+    def _apply_progression(
+        self,
+        proposed_actions: List[Any],
+        trace_id: Optional[str] = None,
+        allow_set_range: bool = False,
+        allow_set_rules: bool = False,
+    ) -> List[str]:
         old_min = self.state.min_g
         old_max = self.state.max_g
         old_rules = list(self.state.active_rules)
 
         actions = self._normalize_progression_actions(proposed_actions)
         applied: List[str] = []
+        has_set_range_action = any(str(action.get("type", "")).strip().lower() == "set_range" for action in actions)
+        set_range_applied = False
 
-        if not self.state.range_locked and self._should_lock_range():
+        if not has_set_range_action and not self.state.range_locked and self._should_lock_range():
             applied.append(self._lock_range(trace_id=trace_id, source="pre_progression"))
 
         trace_event(
@@ -889,10 +1101,100 @@ class GameEngine:
             start_min=old_min,
             start_max=old_max,
             start_rules=old_rules,
+            allow_set_range=allow_set_range,
+            allow_set_rules=allow_set_rules,
         )
 
         for action in actions:
             action_type = action.get("type", "")
+
+            if action_type == "set_rules":
+                if not allow_set_rules:
+                    applied.append("set_rules_skipped_not_allowed")
+                    continue
+
+                raw_rules = action.get("rules")
+                if not isinstance(raw_rules, list):
+                    applied.append("set_rules_skipped_invalid_values")
+                    continue
+
+                next_rules: List[str] = []
+                for raw_rule in raw_rules:
+                    if not isinstance(raw_rule, str):
+                        continue
+                    normalized_rule = self._normalize_rule(raw_rule)
+                    if normalized_rule is None:
+                        continue
+                    if normalized_rule in next_rules:
+                        continue
+                    if self._is_contradictory(normalized_rule, next_rules):
+                        continue
+                    next_rules.append(normalized_rule)
+                    if len(next_rules) >= self.config.max_rules:
+                        break
+
+                previous_rules = list(self.state.active_rules)
+                self.state.active_rules = next_rules
+                applied.append(f"set_rules:{len(next_rules)}")
+                trace_event(
+                    "engine",
+                    "progression.set_rules",
+                    trace_id=trace_id,
+                    old_rules=previous_rules,
+                    new_rules=next_rules,
+                )
+                continue
+
+            if action_type == "set_range":
+                if not allow_set_range:
+                    applied.append("set_range_skipped_not_allowed")
+                    continue
+
+                raw_min = action.get("min_g")
+                raw_max = action.get("max_g")
+                try:
+                    if isinstance(raw_min, bool) or isinstance(raw_max, bool):
+                        raise ValueError("bool values are not valid bounds")
+
+                    if isinstance(raw_min, int):
+                        new_min = raw_min
+                    elif isinstance(raw_min, str) and re.fullmatch(r"[+-]?\d+", raw_min.strip()):
+                        new_min = int(raw_min.strip())
+                    else:
+                        new_min = int(round(float(raw_min)))
+
+                    if isinstance(raw_max, int):
+                        new_max = raw_max
+                    elif isinstance(raw_max, str) and re.fullmatch(r"[+-]?\d+", raw_max.strip()):
+                        new_max = int(raw_max.strip())
+                    else:
+                        new_max = int(round(float(raw_max)))
+                except Exception:
+                    applied.append("set_range_skipped_invalid_values")
+                    continue
+
+                if new_min < 1 or new_max <= new_min:
+                    applied.append("set_range_skipped_invalid_bounds")
+                    continue
+
+                prev_min = self.state.min_g
+                prev_max = self.state.max_g
+                self.state.min_g = new_min
+                self.state.max_g = new_max
+                # Keep demo-driven explicit ranges movable on later turns.
+                self.state.range_locked = False
+                set_range_applied = True
+                applied.append(f"set_range:{new_min}-{new_max}")
+                trace_event(
+                    "engine",
+                    "progression.set_range",
+                    trace_id=trace_id,
+                    old_min_g=prev_min,
+                    old_max_g=prev_max,
+                    new_min_g=new_min,
+                    new_max_g=new_max,
+                )
+                continue
 
             if action_type == "hold":
                 if self.state.range_locked:
@@ -971,7 +1273,7 @@ class GameEngine:
 
             applied.append(f"unknown_action:{action_type}")
 
-        if not self.state.range_locked and self._should_lock_range():
+        if not set_range_applied and not self.state.range_locked and self._should_lock_range():
             applied.append(self._lock_range(trace_id=trace_id, source="post_progression"))
 
         if self.state.min_g >= self.state.max_g:
