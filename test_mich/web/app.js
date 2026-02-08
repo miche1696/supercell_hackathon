@@ -12,6 +12,9 @@ const dom = {
   answerInput: document.getElementById("answer-input"),
   sendButton: document.getElementById("send-button"),
   restartButton: document.getElementById("restart-button"),
+  ambientVolumeSlider: document.getElementById("ambient-volume-slider"),
+  ambientVolumeValue: document.getElementById("ambient-volume-value"),
+  ambientMuteButton: document.getElementById("ambient-mute-button"),
   speechText: document.getElementById("speech-text"),
   resultBanner: document.getElementById("result-banner"),
   scaleArea: document.getElementById("scale-area"),
@@ -42,12 +45,23 @@ const state = {
   displayedWeightG: 0,
   activeItemEl: null,
   usedSuccessKeys: new Set(),
+  ambientAudio: null,
+  ambientUnlockArmed: false,
+  ambientVolume: 1,
+  ambientMuted: false,
 };
 
 const HEART_FULL = "/assets/full_heart.png";
 const HEART_EMPTY = "/assets/empty_heart.png";
+const AMBIENT_SOUND_SRC = "/assets/sounds/backgound.mp3";
 const ITEM_FRAME_SIZE_PX = 140;
-const ITEM_SHEET_SIZE_PX = ITEM_FRAME_SIZE_PX * 2;
+const USED_ITEM_TILE_SIZE_PX = 120;
+const USED_ITEM_TILE_SCALE = 0.82;
+const USED_ITEM_FRAME_SIZE_PX = Math.round(USED_ITEM_TILE_SIZE_PX * USED_ITEM_TILE_SCALE);
+// Crop a little from each frame edge (5% per side = 10% total) to hide seam artifacts.
+const FALL_ITEM_EDGE_TRIM_RATIO = 0.05;
+const USED_ITEM_EDGE_TRIM_RATIO = 0.05;
+const SPRITE_FRAME_EDGE_TRIM_RATIO = FALL_ITEM_EDGE_TRIM_RATIO;
 const VERDICT_NEEDLE_ANGLE_DEG = 30;
 
 function sleep(ms) {
@@ -56,6 +70,142 @@ function sleep(ms) {
 
 function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value));
+}
+
+function sanitizeEdgeTrimRatio(edgeTrimRatio) {
+  const numeric = Number(edgeTrimRatio);
+  if (!Number.isFinite(numeric)) {
+    return 0;
+  }
+  return clamp(numeric, 0, 0.24);
+}
+
+function getSpriteSheetZoom(edgeTrimRatio = SPRITE_FRAME_EDGE_TRIM_RATIO) {
+  const trim = sanitizeEdgeTrimRatio(edgeTrimRatio);
+  return 1 / (1 - trim * 2);
+}
+
+function applySpriteSheetSizing(el, frameSizePx = ITEM_FRAME_SIZE_PX, edgeTrimRatio = SPRITE_FRAME_EDGE_TRIM_RATIO) {
+  const zoom = getSpriteSheetZoom(edgeTrimRatio);
+  const sheetSize = frameSizePx * 2 * zoom;
+  el.style.backgroundSize = `${sheetSize}px ${sheetSize}px`;
+}
+
+function ensureAmbientAudio() {
+  if (!state.ambientAudio) {
+    const audio = new Audio(AMBIENT_SOUND_SRC);
+    audio.loop = true;
+    audio.preload = "auto";
+    state.ambientAudio = audio;
+  }
+  applyAmbientSettings();
+  return state.ambientAudio;
+}
+
+function applyAmbientSettings() {
+  if (!state.ambientAudio) {
+    return;
+  }
+  state.ambientAudio.volume = clamp(state.ambientVolume, 0, 1);
+  state.ambientAudio.muted = !!state.ambientMuted;
+}
+
+function refreshAmbientControls() {
+  if (dom.ambientVolumeSlider) {
+    dom.ambientVolumeSlider.value = String(Math.round(clamp(state.ambientVolume, 0, 1) * 100));
+  }
+  if (dom.ambientVolumeValue) {
+    dom.ambientVolumeValue.textContent = `${Math.round(clamp(state.ambientVolume, 0, 1) * 100)}%`;
+  }
+  if (dom.ambientMuteButton) {
+    dom.ambientMuteButton.textContent = state.ambientMuted ? "UNMUTE" : "MUTE";
+    dom.ambientMuteButton.setAttribute("aria-pressed", state.ambientMuted ? "true" : "false");
+  }
+}
+
+function tryPlayAmbientFromInteraction() {
+  const audio = ensureAmbientAudio();
+  if (!audio.paused) {
+    return;
+  }
+
+  const playPromise = audio.play();
+  if (playPromise && typeof playPromise.catch === "function") {
+    playPromise.catch(() => {
+      armAmbientUnlockFromGesture();
+    });
+  }
+}
+
+function onAmbientVolumeChange(rawValue) {
+  const numeric = Number(rawValue);
+  if (!Number.isFinite(numeric)) {
+    return;
+  }
+
+  state.ambientVolume = clamp(numeric / 100, 0, 1);
+  if (state.ambientVolume > 0 && state.ambientMuted) {
+    state.ambientMuted = false;
+  }
+
+  applyAmbientSettings();
+  refreshAmbientControls();
+  tryPlayAmbientFromInteraction();
+}
+
+function onAmbientMuteToggle() {
+  state.ambientMuted = !state.ambientMuted;
+  applyAmbientSettings();
+  refreshAmbientControls();
+  if (!state.ambientMuted) {
+    tryPlayAmbientFromInteraction();
+  }
+}
+
+function armAmbientUnlockFromGesture() {
+  if (state.ambientUnlockArmed) {
+    return;
+  }
+  state.ambientUnlockArmed = true;
+
+  const handler = () => {
+    window.removeEventListener("pointerdown", handler);
+    window.removeEventListener("keydown", handler);
+
+    const audio = ensureAmbientAudio();
+    applyAmbientSettings();
+    const playPromise = audio.play();
+    if (playPromise && typeof playPromise.then === "function") {
+      playPromise
+        .then(() => {
+          state.ambientUnlockArmed = false;
+        })
+        .catch(() => {
+          // Some environments still block autoplay; re-arm for a later gesture.
+          state.ambientUnlockArmed = false;
+          armAmbientUnlockFromGesture();
+        });
+      return;
+    }
+    state.ambientUnlockArmed = false;
+  };
+
+  window.addEventListener("pointerdown", handler, { once: true });
+  window.addEventListener("keydown", handler, { once: true });
+}
+
+function playAmbientLoopFromStart() {
+  const audio = ensureAmbientAudio();
+  audio.loop = true;
+  applyAmbientSettings();
+  audio.currentTime = 0;
+
+  const playPromise = audio.play();
+  if (playPromise && typeof playPromise.catch === "function") {
+    playPromise.catch(() => {
+      armAmbientUnlockFromGesture();
+    });
+  }
 }
 
 function formatRange(g) {
@@ -228,14 +378,16 @@ function animateWeightTo(targetWeightG, durationMs = 850) {
   });
 }
 
-function setItemFrame(el, frameNumber) {
-  const positions = {
-    1: "0px 0px",
-    2: `-${ITEM_FRAME_SIZE_PX}px 0px`,
-    3: `0px -${ITEM_FRAME_SIZE_PX}px`,
-    4: `-${ITEM_FRAME_SIZE_PX}px -${ITEM_FRAME_SIZE_PX}px`,
-  };
-  el.style.backgroundPosition = positions[frameNumber] || positions[4];
+function setItemFrame(el, frameNumber, frameSizePx = ITEM_FRAME_SIZE_PX, edgeTrimRatio = SPRITE_FRAME_EDGE_TRIM_RATIO) {
+  const normalizedFrame = [1, 2, 3, 4].includes(frameNumber) ? frameNumber : 4;
+  const col = normalizedFrame === 2 || normalizedFrame === 4 ? 1 : 0;
+  const row = normalizedFrame === 3 || normalizedFrame === 4 ? 1 : 0;
+  const trim = sanitizeEdgeTrimRatio(edgeTrimRatio);
+  const zoom = getSpriteSheetZoom(trim);
+  const inset = frameSizePx * trim;
+  const x = -((col * frameSizePx + inset) * zoom);
+  const y = -((row * frameSizePx + inset) * zoom);
+  el.style.backgroundPosition = `${x.toFixed(3)}px ${y.toFixed(3)}px`;
 }
 
 function spawnItem(assetUrl) {
@@ -244,13 +396,13 @@ function spawnItem(assetUrl) {
   const el = document.createElement("div");
   el.className = "item-sprite";
   el.style.backgroundImage = `url('${assetUrl}')`;
-  el.style.backgroundSize = `${ITEM_SHEET_SIZE_PX}px ${ITEM_SHEET_SIZE_PX}px`;
+  applySpriteSheetSizing(el, ITEM_FRAME_SIZE_PX, FALL_ITEM_EDGE_TRIM_RATIO);
   el.style.left = "50%";
   const scaleAreaTop = dom.scaleArea.getBoundingClientRect().top;
   const offscreenStartTop = -Math.ceil(scaleAreaTop + 180);
   el.style.top = `${offscreenStartTop}px`;
   el.style.transform = "translateX(-50%)";
-  setItemFrame(el, 1);
+  setItemFrame(el, 1, ITEM_FRAME_SIZE_PX, FALL_ITEM_EDGE_TRIM_RATIO);
 
   dom.itemLayer.appendChild(el);
   state.activeItemEl = el;
@@ -287,11 +439,17 @@ function addUsedObject(canonicalName, assetUrl) {
 
   const sprite = document.createElement("div");
   sprite.className = "used-item-sprite";
-  sprite.style.backgroundImage = `url('${assetUrl}')`;
-  sprite.style.backgroundSize = `${ITEM_SHEET_SIZE_PX}px ${ITEM_SHEET_SIZE_PX}px`;
-  setItemFrame(sprite, 4);
+  sprite.style.setProperty("--used-item-scale", `${USED_ITEM_TILE_SCALE}`);
   sprite.title = displayName;
   sprite.setAttribute("aria-label", displayName);
+
+  const spriteFrame = document.createElement("div");
+  spriteFrame.className = "used-item-sprite-frame";
+  spriteFrame.style.backgroundImage = `url('${assetUrl}')`;
+  applySpriteSheetSizing(spriteFrame, USED_ITEM_FRAME_SIZE_PX, USED_ITEM_EDGE_TRIM_RATIO);
+  setItemFrame(spriteFrame, 4, USED_ITEM_FRAME_SIZE_PX, USED_ITEM_EDGE_TRIM_RATIO);
+
+  sprite.appendChild(spriteFrame);
 
   const label = document.createElement("div");
   label.className = "used-item-label";
@@ -323,12 +481,12 @@ async function animateDropSequence(el) {
   // 3 -> touching floor
   el.style.transition = "top 150ms ease-out";
   el.style.top = "210px";
-  setItemFrame(el, 3);
+  setItemFrame(el, 3, ITEM_FRAME_SIZE_PX, FALL_ITEM_EDGE_TRIM_RATIO);
   triggerScalePlateBump();
   await sleep(150);
 
   // 4 -> standby
-  setItemFrame(el, 4);
+  setItemFrame(el, 4, ITEM_FRAME_SIZE_PX, FALL_ITEM_EDGE_TRIM_RATIO);
 
   // Tiny settle bounce
   el.style.transition = "top 120ms ease-out";
@@ -710,6 +868,7 @@ async function restartGame() {
   updateHudFromBackend();
   updateTimerDisplay();
   setSpeech("Get ready.");
+  playAmbientLoopFromStart();
 
   await runStartCountdown();
 }
@@ -746,6 +905,10 @@ function wireEvents() {
   });
 
   dom.restartButton.addEventListener("click", restartGame);
+  dom.ambientVolumeSlider.addEventListener("input", (ev) => {
+    onAmbientVolumeChange(ev.target.value);
+  });
+  dom.ambientMuteButton.addEventListener("click", onAmbientMuteToggle);
 
   window.addEventListener("keydown", (ev) => {
     if (ev.key === "Escape") {
@@ -759,6 +922,8 @@ async function boot() {
   wireEvents();
   disableInput(true);
   resetUsedObjects();
+  refreshAmbientControls();
+  applyAmbientSettings();
   state.backend = await apiStart();
   state.timeRemaining = state.backend.config?.timer_seconds ?? 60;
 
@@ -768,6 +933,7 @@ async function boot() {
   setWeightDisplayState("idle");
   setWeightDisplayValue(0);
   setSpeech("Get ready.");
+  playAmbientLoopFromStart();
 
   startTimerLoop();
   await runStartCountdown();

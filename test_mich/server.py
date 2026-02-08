@@ -22,6 +22,14 @@ class GameRequestHandler(SimpleHTTPRequestHandler):
         self._trace_id = None
         super().__init__(*args, directory=str(PROJECT_ROOT), **kwargs)
 
+    def end_headers(self) -> None:
+        # Disable browser caching for local dev static assets so style/script edits are immediate.
+        if self.path == "/" or self.path.startswith("/web/") or self.path.startswith("/assets/"):
+            self.send_header("Cache-Control", "no-store, no-cache, must-revalidate")
+            self.send_header("Pragma", "no-cache")
+            self.send_header("Expires", "0")
+        super().end_headers()
+
     def _begin_trace(self) -> str:
         incoming = self.headers.get("X-Trace-Id", "").strip()
         trace_id = incoming or new_trace_id()

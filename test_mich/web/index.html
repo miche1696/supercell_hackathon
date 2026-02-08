@@ -4,17 +4,25 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Bribe the Scale</title>
-    <link rel="stylesheet" href="/web/styles.css" />
+    <link rel="stylesheet" href="/web/styles.css?v=20260208c" />
   </head>
   <body>
     <div id="game-root">
       <div id="hud-left" class="panel">
-        <div id="timer-box">Time: <span id="timer-value">60</span></div>
         <div id="score-box">Score: <span id="score-value">0</span></div>
         <div id="lives-box">
           <span>Lives:</span>
           <div id="hearts-row"></div>
         </div>
+      </div>
+
+      <div id="audio-controls" class="panel">
+        <label id="ambient-volume-label" for="ambient-volume-slider">
+          <span>Volume</span>
+          <span id="ambient-volume-value">100%</span>
+        </label>
+        <input id="ambient-volume-slider" type="range" min="0" max="100" step="1" value="100" />
+        <button id="ambient-mute-button" type="button" aria-pressed="false">MUTE</button>
       </div>
 
       <div id="rules-panel" class="panel">
@@ -58,6 +66,7 @@
 
         <div id="input-row">
           <input id="answer-input" type="text" autocomplete="off" placeholder="Type one item..." />
+          <div id="timer-inline" aria-live="polite"><span id="timer-value">60</span></div>
           <button id="send-button">SEND</button>
         </div>
       </div>
@@ -82,6 +91,6 @@
       </div>
     </div>
 
-    <script src="/web/app.js" defer></script>
+    <script src="/web/app.js?v=20260208c" defer></script>
   </body>
 </html>
