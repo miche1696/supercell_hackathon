@@ -51,6 +51,7 @@ const state = {
   ambientUnlockArmed: false,
   ambientVolume: 1,
   ambientMuted: false,
+  plateHitAudio: null,
   speechTypingTimer: null,
   speechTypingToken: 0,
 };
@@ -59,6 +60,8 @@ const HEART_FULL = "/assets/full_heart.png";
 const HEART_EMPTY = "/assets/empty_heart.png";
 const AMBIENT_SOUND_SRC = "/assets/sounds/sc-hackathon-song-with-ambience_256.mp3";
 const AMBIENT_OUTPUT_SCALE = 0.2;
+const PLATE_HIT_SOUND_SRC = "/assets/sounds/HIT-tommi.wav";
+const PLATE_HIT_VOLUME = 0.06;
 const ITEM_FRAME_SIZE_PX = 140;
 const USED_ITEM_TILE_SIZE_PX = 120;
 const USED_ITEM_TILE_SCALE = 0.82;
@@ -213,6 +216,29 @@ function playAmbientLoopFromStart() {
   if (playPromise && typeof playPromise.catch === "function") {
     playPromise.catch(() => {
       armAmbientUnlockFromGesture();
+    });
+  }
+}
+
+function ensurePlateHitAudio() {
+  if (!state.plateHitAudio) {
+    const audio = new Audio(PLATE_HIT_SOUND_SRC);
+    audio.preload = "auto";
+    state.plateHitAudio = audio;
+  }
+  state.plateHitAudio.volume = clamp(PLATE_HIT_VOLUME, 0, 1);
+  return state.plateHitAudio;
+}
+
+function playPlateHitSound() {
+  const audio = ensurePlateHitAudio();
+  if (!audio.paused) {
+    audio.currentTime = 0;
+  }
+  const playPromise = audio.play();
+  if (playPromise && typeof playPromise.catch === "function") {
+    playPromise.catch(() => {
+      // Non-critical SFX; ignore playback rejections in restricted environments.
     });
   }
 }
@@ -546,6 +572,7 @@ async function animateDropSequence(el) {
   el.style.top = "210px";
   setItemFrame(el, 3, ITEM_FRAME_SIZE_PX, FALL_ITEM_EDGE_TRIM_RATIO);
   triggerScalePlateBump();
+  playPlateHitSound();
   await sleep(150);
 
   // 4 -> standby
@@ -996,6 +1023,7 @@ async function boot() {
   resetUsedObjects();
   refreshAmbientControls();
   applyAmbientSettings();
+  ensurePlateHitAudio();
   state.backend = await apiStart();
   state.timeRemaining = state.backend.config?.timer_seconds ?? 60;
 
