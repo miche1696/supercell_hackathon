@@ -8,6 +8,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple
 
+from backend.openai_image_generator import OpenAIImageGenerator
 from backend.openai_judge import OpenAIJudge
 from backend.tracing import trace_event, trace_span
 
@@ -58,6 +59,7 @@ class AssetPipeline:
         self.generated_dir = self.assets_dir / "generated"
         self.generated_dir.mkdir(parents=True, exist_ok=True)
         self.placeholder_source = self.assets_dir / "cat.png"
+        self.image_generator = OpenAIImageGenerator.from_env(project_root=project_root)
 
     def _scan_asset_index(self) -> Dict[str, str]:
         index: Dict[str, str] = {}
@@ -113,18 +115,44 @@ class AssetPipeline:
         generated_path = self.generated_dir / generated_name
 
         if not generated_path.exists():
-            if self.placeholder_source.exists():
-                shutil.copyfile(self.placeholder_source, generated_path)
-                trace_event(
-                    "assets",
-                    "resolve_or_generate.generated_copy",
-                    trace_id=trace_id,
-                    canonical_name=canonical_name,
-                    generated_path=str(generated_path),
-                    source_path=str(self.placeholder_source),
-                )
-            else:
-                raise FileNotFoundError("Missing assets/cat.png placeholder for generation pipeline")
+            if self.image_generator is not None:
+                try:
+                    image_bytes = self.image_generator.generate_sprite_sheet(canonical_name, trace_id=trace_id)
+                    generated_path.write_bytes(image_bytes)
+                    trace_event(
+                        "assets",
+                        "resolve_or_generate.generated_ai",
+                        trace_id=trace_id,
+                        canonical_name=canonical_name,
+                        generated_path=str(generated_path),
+                        bytes_written=len(image_bytes),
+                        image_model=self.image_generator.model,
+                    )
+                except Exception as exc:
+                    trace_event(
+                        "assets",
+                        "resolve_or_generate.generated_ai_failed",
+                        trace_id=trace_id,
+                        canonical_name=canonical_name,
+                        generated_path=str(generated_path),
+                        error_type=type(exc).__name__,
+                        error=str(exc),
+                        level="WARNING",
+                    )
+
+            if not generated_path.exists():
+                if self.placeholder_source.exists():
+                    shutil.copyfile(self.placeholder_source, generated_path)
+                    trace_event(
+                        "assets",
+                        "resolve_or_generate.generated_fallback_copy",
+                        trace_id=trace_id,
+                        canonical_name=canonical_name,
+                        generated_path=str(generated_path),
+                        source_path=str(self.placeholder_source),
+                    )
+                else:
+                    raise FileNotFoundError("Missing assets/cat.png placeholder for generation fallback")
         else:
             trace_event(
                 "assets",
