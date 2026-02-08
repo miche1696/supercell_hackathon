@@ -196,6 +196,8 @@ body {
 }
 
 #prompt-box {
+  position: relative;
+  z-index: 12;
   margin: 0 auto;
   width: min(100%, 780px);
   min-height: 132px;
@@ -267,6 +269,7 @@ body {
 
 #scale-area {
   position: absolute;
+  z-index: 2;
   left: 50%;
   top: 48%;
   transform: translate(-50%, -50%) scale(1.3);
@@ -340,6 +343,22 @@ body {
   background-repeat: no-repeat;
   background-size: 200% 200%;
   image-rendering: pixelated;
+}
+
+#scale-box {
+  position: absolute;
+  left: 50%;
+  top: 8%;
+  width: 172px;
+  transform: translate(-50%, -50%) rotate(180deg);
+  transform-origin: center center;
+  image-rendering: pixelated;
+  pointer-events: none;
+  z-index: 5;
+}
+
+#scale-box.is-shaking {
+  animation: scale-box-shake 240ms ease-in-out;
 }
 
 #used-objects-area {
@@ -692,5 +711,26 @@ body {
   50%,
   100% {
     opacity: 0;
+  }
+}
+
+@keyframes scale-box-shake {
+  0% {
+    transform: translate(-50%, -50%) rotate(180deg);
+  }
+  20% {
+    transform: translate(calc(-50% - 2px), calc(-50% + 1px)) rotate(182deg);
+  }
+  40% {
+    transform: translate(calc(-50% + 2px), calc(-50% - 1px)) rotate(178deg);
+  }
+  60% {
+    transform: translate(calc(-50% - 1px), calc(-50% + 1px)) rotate(181deg);
+  }
+  80% {
+    transform: translate(calc(-50% + 1px), calc(-50% - 1px)) rotate(179deg);
+  }
+  100% {
+    transform: translate(-50%, -50%) rotate(180deg);
   }
 }

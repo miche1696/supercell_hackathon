@@ -20,6 +20,7 @@ const dom = {
   scaleArea: document.getElementById("scale-area"),
   scalePlate: document.getElementById("scale-plate"),
   scaleNeedle: document.getElementById("scale-needle"),
+  scaleBox: document.getElementById("scale-box"),
   scaleWeightDisplay: document.getElementById("scale-weight-display"),
   scaleWeightValue: document.getElementById("scale-weight-value"),
   itemLayer: document.getElementById("item-layer"),
@@ -343,6 +344,15 @@ function triggerScalePlateBump() {
   dom.scalePlate.classList.add("impact-bump");
 }
 
+function triggerScaleBoxShake() {
+  if (!dom.scaleBox) {
+    return;
+  }
+  dom.scaleBox.classList.remove("is-shaking");
+  void dom.scaleBox.offsetWidth;
+  dom.scaleBox.classList.add("is-shaking");
+}
+
 function startNeedleOscillation() {
   if (state.needleAnimating) {
     return;
@@ -443,6 +453,7 @@ function setItemFrame(el, frameNumber, frameSizePx = ITEM_FRAME_SIZE_PX, edgeTri
 
 function spawnItem(assetUrl) {
   clearActiveItem();
+  triggerScaleBoxShake();
 
   const el = document.createElement("div");
   el.className = "item-sprite";
