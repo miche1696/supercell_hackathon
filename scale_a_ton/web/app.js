@@ -57,7 +57,8 @@ const state = {
 
 const HEART_FULL = "/assets/full_heart.png";
 const HEART_EMPTY = "/assets/empty_heart.png";
-const AMBIENT_SOUND_SRC = "/assets/sounds/backgound.mp3";
+const AMBIENT_SOUND_SRC = "/assets/sounds/sc-hackathon-song-with-ambience_256.mp3";
+const AMBIENT_OUTPUT_SCALE = 0.2;
 const ITEM_FRAME_SIZE_PX = 140;
 const USED_ITEM_TILE_SIZE_PX = 120;
 const USED_ITEM_TILE_SCALE = 0.82;
@@ -114,7 +115,7 @@ function applyAmbientSettings() {
   if (!state.ambientAudio) {
     return;
   }
-  state.ambientAudio.volume = clamp(state.ambientVolume, 0, 1);
+  state.ambientAudio.volume = clamp(state.ambientVolume, 0, 1) * AMBIENT_OUTPUT_SCALE;
   state.ambientAudio.muted = !!state.ambientMuted;
 }
 
